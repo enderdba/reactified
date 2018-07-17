@@ -1,0 +1,22 @@
+.anyClass {
+  height: 70vh;
+  overflow-y: scroll;
+}
+
+.list-group-item:hover{
+  cursor: pointer;
+  background-color: cornsilk;
+}
+
+body{
+  margin-top: 2%;
+}
+
+.map{
+  opacity: 0;
+  height: 300px;
+}
+
+.show{
+  opacity : 1 !important;
+}
