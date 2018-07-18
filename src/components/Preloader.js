@@ -1,3 +1,5 @@
+//Preloader component makes easier to render a preloading gif whenever necessary, using state updating in all components.
+//It receives props type to render different GIFs
 import React, { Component } from "react";
 
 class Preloader extends Component {

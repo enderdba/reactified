@@ -1,3 +1,6 @@
+//The maps component will be the one who is in charge of loading the google maps script for the first time, and also setting up the first location of the map.
+//The props of the elements will be treated here, including the google object.
+//It receives props as latitude, longitude and a flag to check if the first province was fully loaded.
 import React, { Component } from "react";
 import GoogleMapsLoader from "google-maps";
 

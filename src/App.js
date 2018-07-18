@@ -1,3 +1,9 @@
+//MAIN APP COMPONENT
+//This component is the father of all other components we use in the app, from here, it makes the most API calls
+//for all the components, serves as a data provider for all the other components, and other components will receive the data as props whenever
+//its rendered and updated. It has an initial state so it builds up the component and all the dependencies needed, such as google maps, stitch client and everything else.
+// It has a preloader that finishes whenever the component is rendered for the first time, after all libraries are loaded and running.
+// The componen uses its state to mantain and keep the workflow going, since some components share their state with this component. (See Dropdown.js)
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import { StitchClientFactory } from "mongodb-stitch";
@@ -5,11 +11,10 @@ import Dropdown from "./components/Dropdown";
 import Provinces from "./components/Provinces";
 import { Circle2 } from "react-preloaders";
 import Charts from "./components/Charts";
-import { ToastContainer, toast, Zoom } from "react-toastify";
 import "./App.css";
-import "react-toastify/dist/ReactToastify.css";
-
 import Maps from "./components/Maps";
+
+//Main component constructor, where i make the one and only client promise to check the stitch status after the component mounts.
 class App extends Component {
   constructor(props) {
     super(props);
@@ -34,10 +39,12 @@ class App extends Component {
     this.handleProvinceChange = this.handleProvinceChange.bind(this);
   }
 
+  //Prepare the first state of the component when the component mounts and loads for the first time
   componentDidMount() {
     this.displayCommentsOnLoad();
   }
 
+  //Saves after a promise is made the connection between the app and stitch, so i can run queries and searches.
   displayCommentsOnLoad() {
     var client, db;
     this.state.clientPromise.then(stitchClient => {
@@ -47,17 +54,23 @@ class App extends Component {
         db: db,
         client: client
       });
+      this.displayProvinceData("AB");
+      this.displayStationData("CA003010232",true); 
     });
   }
 
+  //Function that is called to set up the connection flag whenever its ready
   handleClientConnection() {
     this.setState({ connected: true });
   }
 
+  //Function that is called to set up a flag whenever the province is changed. It's triggered after a function in the Dropdown component is called.
   handleProvinceChange(province) {
     this.setState({ selectedProvince: province });
   }
 
+  //Function that triggers after the state of the component is changed. 
+  //Uses the nextState property to validate if some properties are still the same, so it won't re-render
   componentWillUpdate(nextProps, nextState) {
     //check if the connection to stitch will be made
     if (nextState.client !== this.state.client) {
@@ -77,6 +90,8 @@ class App extends Component {
     }
   }
 
+  //Called after a province has been clicked,
+  //creating a list of JSX elements which are passed as a list of props in the provinces component.
   displayProvinceData(p) {
     this.setState({ provinceList: "loading" });
     this.state.client.executeFunction("searchStationCache", p).then(result => {
@@ -98,11 +113,9 @@ class App extends Component {
     });
   }
 
+  //Creates and renders some information about the station thas has been clicked, changing the actual state and serving as a point of data retrieval for some components.
   displayStationData(s, first) {
     if (this.state.station !== s) {
-      if (first) {
-        toast.info("Loading.. please wait");
-      }
       this.state.client.executeFunction("stationDetail", s).then(c => {
         this.setState({
           comment: (
@@ -135,18 +148,6 @@ class App extends Component {
         <div className="App container-fluid">
           <Circle2 />
           <h2 className="text-center ">Canadian Historical Weather Data</h2>
-          <ToastContainer
-            position="top-right"
-            autoClose={99999}
-            hideProgressBar={true}
-            newestOnTop={false}
-            closeOnClick={false}
-            rtl={false}
-            pauseOnVisibilityChange={false}
-            draggable={false}
-            pauseOnHover={false}
-            transition={Zoom}
-          />
           <hr />
           <div className="row">
             <div className="col-4">
@@ -158,7 +159,6 @@ class App extends Component {
               <div>
                 {this.state.comment}
                 <Charts
-                  toast={toast}
                   client={this.state.client}
                   station={this.state.station}
                   maxDate={this.state.maxDate}

@@ -1,3 +1,11 @@
+//Charts component uses chart.js functions to render and update all charts, one of the most complex components, since the state managing is somewhat difficult to understand.
+//Each time the main app component is rendered, it will send default / false props to charts until its fully loaded with data.
+//After every update, it will render ONLY when stations and max dates are changed, checking the props between updates, thanks to componentDidUpdate parameters.
+//The charts once are made for the first time, they keep in the state as the same charts reference, so it just needs to UPDATE whenever the data changes.
+//All the labels and data are mapped after the stitch call using ES6 functions, and then rendered.
+//Since the component uses stitch calls, its passed a client prop to manage all stitch connections necessary.
+//Also, the station and the max date necessary for the queries are passed as props too.
+
 import React, { Component } from "react";
 import Chartjs from "chart.js";
 
@@ -153,7 +161,6 @@ class Charts extends Component {
         });
         tempChart.update();
         precipChart.update();
-        setTimeout(()=>{ this.props.toast.dismiss();},500);
         this.setState({ isLoading: false });
       });
   }

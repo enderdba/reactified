@@ -1,3 +1,5 @@
+//Provinces component is just a small list which is fed from the props object, only rendering whenever it has items.
+//The preloader is called whenever the main app component is doing a stitch call and fetching results.
 import React, { Component } from "react";
 import Preloader from "./Preloader";
 
