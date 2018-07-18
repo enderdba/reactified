@@ -56,7 +56,7 @@ class Dropdown extends Component {
   render() {
     const { toPush } = this.state;
     return (
-      <div className="text-center dropdown">
+      <div className="dropdown">
         <button
           type="button"
           onClick={this.changeDropState.bind(this)}

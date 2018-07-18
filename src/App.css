@@ -3,6 +3,10 @@
   overflow-y: scroll;
 }
 
+.Toastify__close-button{
+  display: none;
+}
+
 .list-group-item:hover{
   cursor: pointer;
   background-color: cornsilk;
@@ -10,6 +14,7 @@
 
 body{
   margin-top: 2%;
+  margin-bottom: 2%;
 }
 
 .map{
@@ -17,6 +22,7 @@ body{
   height: 300px;
 }
 
-.show{
+.showMap{
   opacity : 1 !important;
+  height: 301px;
 }

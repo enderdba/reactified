@@ -12,6 +12,7 @@ class Maps extends Component {
 
   componentDidUpdate() {
     if (this.state.map) {
+      this.state.google.maps.event.trigger(this.state.map,"resize");
       this.state.map.panTo(
         new this.state.google.maps.LatLng(this.props.lat, this.props.lng)
       );
@@ -40,7 +41,8 @@ class Maps extends Component {
   render() {
     return (
       <div
-        className={this.props.loaded ? "map show" : "map"}
+        style={{width: "99%"}}
+        className={this.props.loaded ? "map showMap" : "map"}
         ref={this.map}
       />
     );

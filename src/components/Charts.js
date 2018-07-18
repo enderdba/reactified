@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Chartjs from "chart.js";
-import Preloader from "./Preloader";
+
 class Charts extends Component {
   constructor(props) {
     super(props);
@@ -153,6 +153,7 @@ class Charts extends Component {
         });
         tempChart.update();
         precipChart.update();
+        setTimeout(()=>{ this.props.toast.dismiss();},500);
         this.setState({ isLoading: false });
       });
   }
@@ -160,10 +161,7 @@ class Charts extends Component {
   render() {
     return (
       <div className="text-center">
-        <div className={this.state.isLoading ? "" : "d-none"}>
-          <Preloader type="bars" />
-        </div>
-        <div className={this.state.isLoading ? "d-none" : ""}>
+        <div>
           <canvas id="color-strip" ref={this.tempChart} />
           <canvas id="color-strip" ref={this.precipChart} />
         </div>

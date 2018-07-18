@@ -5,8 +5,9 @@ import Dropdown from "./components/Dropdown";
 import Provinces from "./components/Provinces";
 import { Circle2 } from "react-preloaders";
 import Charts from "./components/Charts";
-import Preloader from "./components/Preloader";
+import { ToastContainer, toast, Zoom } from "react-toastify";
 import "./App.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import Maps from "./components/Maps";
 class App extends Component {
@@ -28,7 +29,7 @@ class App extends Component {
       station: false,
       maxDate: false,
       isLoading: false,
-      loaded : false
+      loaded: false
     };
     this.handleProvinceChange = this.handleProvinceChange.bind(this);
   }
@@ -83,7 +84,7 @@ class App extends Component {
         <small key={index}>
           <a
             onClick={() => {
-              this.displayStationData(c.station,true);
+              this.displayStationData(c.station, true);
             }}
             className="list-group-item"
           >
@@ -97,31 +98,33 @@ class App extends Component {
     });
   }
 
-  displayStationData(s,first) {
-    this.setState({
-      isLoading: true
-    });
-    this.state.client.executeFunction("stationDetail", s).then(c => {
-      this.setState({
-        comment: (
-          <h6>
-            <center>
-              {c.province} Station: {c.station} {c.name}
-              ({c.minimumDate} to {c.maximumDate})
-            </center>
-          </h6>
-        ),
-        myLatLng: {
-          lat: Number(c.lat),
-          lng: Number(c.lon)
-        },
-        station: c.station,
-        maxDate: c.maximumDate,
-        isLoading: false,
-        loaded : first ? true : false
+  displayStationData(s, first) {
+    if (this.state.station !== s) {
+      if (first) {
+        toast.info("Loading.. please wait");
+      }
+      this.state.client.executeFunction("stationDetail", s).then(c => {
+        this.setState({
+          comment: (
+            <h6>
+              <center>
+                {c.province} Station: {c.station} {c.name}
+                ({c.minimumDate} to {c.maximumDate})
+              </center>
+            </h6>
+          ),
+          myLatLng: {
+            lat: Number(c.lat),
+            lng: Number(c.lon)
+          },
+          station: c.station,
+          maxDate: c.maximumDate,
+          isLoading: false,
+          loaded: first ? true : false
+        });
+        //displayCharts(c.station, c.maximumDate);
       });
-      //displayCharts(c.station, c.maximumDate);
-    });
+    }
   }
 
   render() {
@@ -131,31 +134,40 @@ class App extends Component {
       return (
         <div className="App container-fluid">
           <Circle2 />
-          <h2 className="text-center ">
-            Canadian Historical Weather Data
-          </h2>
-
+          <h2 className="text-center ">Canadian Historical Weather Data</h2>
+          <ToastContainer
+            position="top-right"
+            autoClose={99999}
+            hideProgressBar={true}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnVisibilityChange={false}
+            draggable={false}
+            pauseOnHover={false}
+            transition={Zoom}
+          />
           <hr />
           <div className="row">
             <div className="col-4">
-            <Dropdown onSelectedOption={this.handleProvinceChange} />
-          <br/>
+              <Dropdown onSelectedOption={this.handleProvinceChange} />
+              <br />
               <Provinces list={this.state.provinceList} />
             </div>
-            <div  className={this.state.loaded ? "col-8" : "col-8 d-none"}>
-              <div className={this.state.isLoading ? "" : "d-none"}>
-                <Preloader />
-              </div>
-              <div className={this.state.isLoading ? "d-none" : ""}>
-                <div>
-                  {this.state.comment}
-                  <Charts
-                    client={this.state.client}
-                    station={this.state.station}
-                    maxDate={this.state.maxDate}
-                  />
-                  <Maps loaded={this.state.loaded} lat={this.state.myLatLng.lat} lng={this.state.myLatLng.lng} />
-                </div>
+            <div className={this.state.loaded ? "col-8" : "col-8 d-none"}>
+              <div>
+                {this.state.comment}
+                <Charts
+                  toast={toast}
+                  client={this.state.client}
+                  station={this.state.station}
+                  maxDate={this.state.maxDate}
+                />
+                <Maps
+                  loaded={this.state.loaded}
+                  lat={this.state.myLatLng.lat}
+                  lng={this.state.myLatLng.lng}
+                />
               </div>
             </div>
           </div>
