@@ -44,20 +44,20 @@ class App extends Component {
     this.displayCommentsOnLoad();
   }
 
+
   //Saves after a promise is made the connection between the app and stitch, so i can run queries and searches.
   displayCommentsOnLoad() {
     var client, db;
-    
+   // console.log("gonna start the thing");
     this.state.clientPromise.then(stitchClient => {
       client = stitchClient;
       client.authenticate('apiKey', 'IjJKAehxDRcOWyuH1qsESuiWJS4AJU0JeIy9TRUNfADnlSKSMnB12dZcwFpQYbTs').then(userId => {
+        //console.log("completely authed " + userId);
         db = client.service("mongodb", "mongodb-atlas").db("canada");
         this.setState({
           db: db,
           client: client
         });
-        this.displayProvinceData("AB");
-        this.displayStationData("CA003010232",true); 
       });
       }).catch((err) => {
         console.error('Error authenticating: ' + err);
@@ -67,6 +67,10 @@ class App extends Component {
   //Function that is called to set up the connection flag whenever its ready
   handleClientConnection() {
     this.setState({ connected: true });
+    //console.log("FIRST! true");
+    this.displayProvinceData("AB");
+    this.displayStationData("CA003010232",true); 
+    this.setState({first : false});
   }
 
   //Function that is called to set up a flag whenever the province is changed. It's triggered after a function in the Dropdown component is called.
@@ -83,10 +87,9 @@ class App extends Component {
         .login()
         .then(() => {
           this.handleClientConnection();
-          this.displayStationData("CA003010232", false);
         })
         .catch(err => {
-          console.error("failed to log in anonymously:", err);
+          //console.error("failed to log in anonymously:", err);
         });
     }
     //check on update if its necessary to load other province areas
@@ -146,12 +149,9 @@ class App extends Component {
   }
 
   render() {
-    if (!this.state.connected) {
-      return <Circle2 />;
-    } else {
       return (
         <div className="App container-fluid">
-          <Circle2 />
+          <Circle2/>
           <h2 className="text-center ">Canadian Historical Weather Data</h2>
           <hr />
           <div className="row">
@@ -178,7 +178,6 @@ class App extends Component {
           </div>
         </div>
       );
-    }
   }
 }
 
