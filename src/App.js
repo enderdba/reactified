@@ -47,16 +47,21 @@ class App extends Component {
   //Saves after a promise is made the connection between the app and stitch, so i can run queries and searches.
   displayCommentsOnLoad() {
     var client, db;
+    
     this.state.clientPromise.then(stitchClient => {
       client = stitchClient;
-      db = client.service("mongodb", "mongodb-atlas").db("canada");
-      this.setState({
-        db: db,
-        client: client
+      client.authenticate('apiKey', 'IjJKAehxDRcOWyuH1qsESuiWJS4AJU0JeIy9TRUNfADnlSKSMnB12dZcwFpQYbTs').then(userId => {
+        db = client.service("mongodb", "mongodb-atlas").db("canada");
+        this.setState({
+          db: db,
+          client: client
+        });
+        this.displayProvinceData("AB");
+        this.displayStationData("CA003010232",true); 
       });
-      this.displayProvinceData("AB");
-      this.displayStationData("CA003010232",true); 
-    });
+      }).catch((err) => {
+        console.error('Error authenticating: ' + err);
+      });
   }
 
   //Function that is called to set up the connection flag whenever its ready
