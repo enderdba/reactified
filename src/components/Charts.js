@@ -18,7 +18,6 @@ class Charts extends Component {
     this.precipChart = React.createRef();
   }
 
-
   componentDidUpdate(pp, ps) {
     if (
       pp.station !== this.props.station &&

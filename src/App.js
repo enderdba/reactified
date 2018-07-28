@@ -9,11 +9,12 @@ import "bootstrap/dist/css/bootstrap.css";
 import { StitchClientFactory } from "mongodb-stitch";
 import Dropdown from "./components/Dropdown";
 import Provinces from "./components/Provinces";
-import { Circle2 } from "react-preloaders";
 import Charts from "./components/Charts";
 import "./App.css";
 import Maps from "./components/Maps";
-
+import Preloader from "./components/Preloader";
+import "animate.css";
+import "react-tabs/style/react-tabs.css";
 //Main component constructor, where i make the one and only client promise to check the stitch status after the component mounts.
 class App extends Component {
   constructor(props) {
@@ -33,10 +34,14 @@ class App extends Component {
       comment: false,
       station: false,
       maxDate: false,
-      isLoading: false,
-      loaded: false
+      isLoading: true,
+      loaded: false,
+      tabIndex: 0,
+      seeStationData: false,
+      seeProvinceData: false
     };
     this.handleProvinceChange = this.handleProvinceChange.bind(this);
+    this.changeViews = this.changeViews.bind(this);
   }
 
   //Prepare the first state of the component when the component mounts and loads for the first time
@@ -44,23 +49,29 @@ class App extends Component {
     this.displayCommentsOnLoad();
   }
 
-
   //Saves after a promise is made the connection between the app and stitch, so i can run queries and searches.
   displayCommentsOnLoad() {
     var client, db;
-   // console.log("gonna start the thing");
-    this.state.clientPromise.then(stitchClient => {
-      client = stitchClient;
-      client.authenticate('apiKey', 'IjJKAehxDRcOWyuH1qsESuiWJS4AJU0JeIy9TRUNfADnlSKSMnB12dZcwFpQYbTs').then(userId => {
-        //console.log("completely authed " + userId);
-        db = client.service("mongodb", "mongodb-atlas").db("canada");
-        this.setState({
-          db: db,
-          client: client
-        });
-      });
-      }).catch((err) => {
-        console.error('Error authenticating: ' + err);
+    // console.log("gonna start the thing");
+    this.state.clientPromise
+      .then(stitchClient => {
+        client = stitchClient;
+        client
+          .authenticate(
+            "apiKey",
+            "IjJKAehxDRcOWyuH1qsESuiWJS4AJU0JeIy9TRUNfADnlSKSMnB12dZcwFpQYbTs"
+          )
+          .then(userId => {
+            //console.log("completely authed " + userId);
+            db = client.service("mongodb", "mongodb-atlas").db("canada");
+            this.setState({
+              db: db,
+              client: client
+            });
+          });
+      })
+      .catch(err => {
+        console.error("Error authenticating: " + err);
       });
   }
 
@@ -69,16 +80,19 @@ class App extends Component {
     this.setState({ connected: true });
     //console.log("FIRST! true");
     this.displayProvinceData("AB");
-    this.displayStationData("CA003010232",true); 
-    this.setState({first : false});
+    this.displayStationData("CA003010232", true);
+    this.setState({ first: false });
   }
 
   //Function that is called to set up a flag whenever the province is changed. It's triggered after a function in the Dropdown component is called.
   handleProvinceChange(province) {
-    this.setState({ selectedProvince: province });
+    this.setState({
+      selectedProvince: province,
+      tabIndex: 1
+    });
   }
 
-  //Function that triggers after the state of the component is changed. 
+  //Function that triggers after the state of the component is changed.
   //Uses the nextState property to validate if some properties are still the same, so it won't re-render
   componentWillUpdate(nextProps, nextState) {
     //check if the connection to stitch will be made
@@ -116,8 +130,18 @@ class App extends Component {
         </small>
       ));
       this.setState({
-        provinceList: html
+        provinceList: html,
+        loaded: true,
+        seeStationData: true,
+        seeProvinceData: false
       });
+    });
+  }
+
+  changeViews() {
+    this.setState({
+      seeProvinceData: true,
+      seeStationData: false
     });
   }
 
@@ -141,7 +165,8 @@ class App extends Component {
           station: c.station,
           maxDate: c.maximumDate,
           isLoading: false,
-          loaded: first ? true : false
+          seeStationData: true,
+          seeProvinceData: false
         });
         //displayCharts(c.station, c.maximumDate);
       });
@@ -149,35 +174,103 @@ class App extends Component {
   }
 
   render() {
-      return (
-        <div className="App container-fluid">
-          <Circle2/>
+    return (
+      <div>
+        <div className="App container-fluid d-none d-md-block">
           <h2 className="text-center ">Canadian Historical Weather Data</h2>
           <hr />
-          <div className="row">
-            <div className="col-4">
+          <div
+            className={
+              this.state.isLoading ? "loaderDefault text-center" : "d-none"
+            }
+          >
+            <Preloader type="bars" cap={false} />
+          </div>
+          <div
+            className={
+              this.state.isLoading ? "" : "row animated fadeIn delay-2s slow"
+            }
+          >
+            <div className={this.state.loaded ? "col-4" : "col-4  d-none"}>
               <Dropdown onSelectedOption={this.handleProvinceChange} />
               <br />
               <Provinces list={this.state.provinceList} />
             </div>
             <div className={this.state.loaded ? "col-8" : "col-8 d-none"}>
-              <div>
-                {this.state.comment}
-                <Charts
-                  client={this.state.client}
-                  station={this.state.station}
-                  maxDate={this.state.maxDate}
-                />
-                <Maps
-                  loaded={this.state.loaded}
-                  lat={this.state.myLatLng.lat}
-                  lng={this.state.myLatLng.lng}
-                />
-              </div>
+              {this.state.comment}
+              <Charts
+                client={this.state.client}
+                station={this.state.station}
+                maxDate={this.state.maxDate}
+              />
+              <Maps
+                loaded={this.state.loaded}
+                lat={this.state.myLatLng.lat}
+                lng={this.state.myLatLng.lng}
+              />
             </div>
           </div>
         </div>
-      );
+        <div className="App container-fluid d-md-none">
+          <h2 className="text-center ">Canadian Historical Weather Data</h2>
+          <hr />
+          <div
+            className={
+              this.state.isLoading ? "d-none" : "animated fadeIn delay-2s slow"
+            }
+          >
+            <div
+              className={
+                this.state.seeProvinceData
+                  ? "animated fadeIn delay-1s"
+                  : "d-none"
+              }
+            >
+              <Dropdown onSelectedOption={this.handleProvinceChange} />
+              <br />
+              <div className="container">
+                <Provinces list={this.state.provinceList} />
+              </div>
+            </div>
+            <div
+              className={
+                this.state.seeStationData
+                  ? "animated fadeIn delay-1s text-center"
+                  : "d-none"
+              }
+            >
+              <button
+                type="button"
+                onClick={this.changeViews}
+                className="btn btn-primary"
+              >
+                Station Select
+              </button>
+              <br />
+              <br />
+              {this.state.comment}
+              <Charts
+                client={this.state.client}
+                station={this.state.station}
+                maxDate={this.state.maxDate}
+              />
+              <Maps
+                loaded={this.state.loaded}
+                lat={this.state.myLatLng.lat}
+                lng={this.state.myLatLng.lng}
+              />
+            </div>
+          </div>
+          <div
+            className={
+              this.state.isLoading ? "loaderDefault text-center" : "d-none"
+            }
+          >
+            <Preloader type="bars" cap={false} />
+          </div>
+        </div>
+      </div>
+    );
   }
 }
 
